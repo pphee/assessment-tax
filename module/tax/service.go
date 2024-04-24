@@ -43,11 +43,16 @@ func (service *TaxService) CalculateTax(req model.TaxRequest) (float64, error) {
 		totalDeductions += allowance.Amount
 	}
 
+	if req.WHT < 0 || req.WHT > req.TotalIncome {
+		return 0, errors.New("invalid WHT value")
+	}
+
 	taxableIncome := req.TotalIncome - totalDeductions - allowances[0].Amount
 	tax, err := utils.CalculateIncomeTaxDetailed(taxableIncome)
 	if err != nil {
 		return 0, fmt.Errorf("failed to calculate income tax: %w", err)
 	}
+	tax -= req.WHT
 
 	return tax, nil
 }
