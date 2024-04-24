@@ -17,13 +17,39 @@ type Allowance struct {
 }
 
 type TaxResponse struct {
-	Tax float64 `json:"-"`
+	Tax       float64      `json:"-"`
+	TaxLevels []TaxBracket `json:"taxLevel"`
 }
 
 func (tr TaxResponse) MarshalJSON() ([]byte, error) {
+	taxLevels := make([]struct {
+		Level string      `json:"level"`
+		Tax   json.Number `json:"tax"`
+	}, len(tr.TaxLevels))
+
+	for i, tl := range tr.TaxLevels {
+		taxLevels[i] = struct {
+			Level string      `json:"level"`
+			Tax   json.Number `json:"tax"`
+		}{
+			Level: tl.Level,
+			Tax:   json.Number(fmt.Sprintf("%.1f", tl.Tax)),
+		}
+	}
+
 	return json.Marshal(&struct {
-		Tax json.Number `json:"tax"`
+		Tax       json.Number `json:"tax"`
+		TaxLevels []struct {
+			Level string      `json:"level"`
+			Tax   json.Number `json:"tax"`
+		} `json:"taxLevel"`
 	}{
-		Tax: json.Number(fmt.Sprintf("%.1f", tr.Tax)),
+		Tax:       json.Number(fmt.Sprintf("%.1f", tr.Tax)),
+		TaxLevels: taxLevels,
 	})
+}
+
+type TaxBracket struct {
+	Level string  `json:"level"`
+	Tax   float64 `json:"tax"`
 }
