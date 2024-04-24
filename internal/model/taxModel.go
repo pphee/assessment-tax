@@ -57,3 +57,19 @@ type TaxBracket struct {
 type AdminRequest struct {
 	Amount float64 `json:"amount"`
 }
+
+type TotalIncomeCsv struct {
+	TotalIncome float64 `csv:"totalIncome"`
+	WHT         float64 `csv:"wht"`
+	Donation    float64 `csv:"donation"`
+}
+
+type TaxDetail struct {
+	TotalIncome float64 `json:"totalIncome"`
+	Tax         float64 `json:"tax"`
+	TaxRefund   float64 `json:"taxRefund,omitempty"`
+}
+
+type TaxResponseCSV struct {
+	Taxes []TaxDetail `json:"taxes"`
+}

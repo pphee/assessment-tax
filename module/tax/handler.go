@@ -3,6 +3,8 @@ package tax
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/pphee/assessment-tax/internal/model"
+	"github.com/pphee/assessment-tax/utils"
+	"mime/multipart"
 	"net/http"
 )
 
@@ -48,4 +50,53 @@ func (h *TaxHandler) SetPersonalDeduction(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"personalDeduction": req.Amount})
+}
+
+func (h *TaxHandler) TaxCalculationsCSVHandler(c echo.Context) error {
+	file, err := c.FormFile("taxes")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "No file uploaded"})
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Error opening file"})
+	}
+	defer func(src multipart.File) {
+		err := src.Close()
+		if err != nil {
+			return
+		}
+	}(src)
+
+	records, err := h.TaxService.TaxFromFile(src)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Error reading file"})
+	}
+
+	var taxDetails []model.TaxDetail
+	for _, record := range records {
+		PersonalDeductionDefault := 60000.00
+		taxableIncome := record.TotalIncome - PersonalDeductionDefault - record.Donation
+		tax, _ := utils.CalculateIncomeTaxDetailed(taxableIncome)
+		netTax := tax - record.WHT
+
+		taxRefund := 0.0
+		if netTax < 0 {
+			taxRefund = -netTax
+			netTax = 0
+		}
+
+		taxDetails = append(taxDetails, model.TaxDetail{
+			TotalIncome: record.TotalIncome,
+			Tax:         netTax,
+			TaxRefund:   taxRefund,
+		})
+	}
+
+	response := model.TaxResponseCSV{
+		Taxes: taxDetails,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
