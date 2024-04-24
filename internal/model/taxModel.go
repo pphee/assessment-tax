@@ -53,3 +53,7 @@ type TaxBracket struct {
 	Level string  `json:"level"`
 	Tax   float64 `json:"tax"`
 }
+
+type AdminRequest struct {
+	Amount float64 `json:"amount"`
+}

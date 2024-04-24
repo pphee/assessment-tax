@@ -58,3 +58,16 @@ func (service *TaxService) CalculateTax(req model.TaxRequest) (float64, []model.
 
 	return tax, taxBrackets, nil
 }
+
+func (service *TaxService) SetPersonalDeduction(amount float64) error {
+	if amount < 10000 || amount > 100000 {
+		return errors.New("amount must be between 10,000 and 100,000")
+	}
+
+	err := service.Repo.SetPersonalDeduction(amount)
+	if err != nil {
+		return fmt.Errorf("failed to set personal deduction: %w", err)
+	}
+
+	return nil
+}
