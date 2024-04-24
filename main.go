@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/pphee/assessment-tax/module/tax"
 	"github.com/pphee/assessment-tax/store"
+	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
@@ -53,9 +58,38 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
 	})
+
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "1323"
+		port = "8080"
 	}
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
+	addr := fmt.Sprintf(":%s", port)
+
+	log.Printf("Starting server on %s", addr)
+
+	go func() {
+		if err := e.Start(addr); err != nil && err != http.ErrServerClosed {
+			e.Logger.Fatal("shutting down the server")
+		}
+	}()
+
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+	<-shutdown
+
+	log.Println("Shutting down server...")
+	startTime := time.Now()
+	log.Println("Sleeping for 5 seconds...")
+	time.Sleep(5 * time.Second)
+	log.Printf("Slept for %.2f seconds", time.Since(startTime).Seconds())
+	log.Println("Shutting down now...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := e.Shutdown(ctx); err != nil {
+		e.Logger.Fatal(err)
+	}
+
+	fmt.Println("Server shutdown complete")
 }
