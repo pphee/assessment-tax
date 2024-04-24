@@ -21,3 +21,14 @@ func (repo *TaxRepository) GetAllowanceConfig() ([]model.AllowanceGorm, error) {
 	}
 	return allowances, nil
 }
+
+func (repo *TaxRepository) SetPersonalDeduction(amount float64) error {
+	allowance := model.AllowanceGorm{
+		AllowanceType: "personalDeduction",
+		Amount:        amount,
+	}
+	if err := repo.DB.Save(&allowance).Error; err != nil {
+		return err
+	}
+	return nil
+}

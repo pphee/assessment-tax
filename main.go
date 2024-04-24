@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/pphee/assessment-tax/module/tax"
 	"github.com/pphee/assessment-tax/store"
 	"net/http"
@@ -25,11 +26,26 @@ func main() {
 	}
 	defer sqlDB.Close()
 
+	// Basic Auth for admin routes
+	adminUser := os.Getenv("ADMIN_USERNAME")
+	adminPass := os.Getenv("ADMIN_PASSWORD")
+	if adminUser == "" || adminPass == "" {
+		e.Logger.Fatal("Admin username or password not set in environment variables")
+	}
+
 	taxRepo := tax.NewTaxRepository(dbStore.DB)
 	taxService := tax.NewTaxService(taxRepo)
 	taxHandler := tax.NewTaxHandler(taxService)
 
 	e.POST("/tax", taxHandler.PostTaxCalculation)
+
+	admin := e.Group("/admin")
+	admin.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		return username == adminUser && password == adminPass, nil
+	}))
+	{
+		admin.POST("/deductions/personal", taxHandler.SetPersonalDeduction)
+	}
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
