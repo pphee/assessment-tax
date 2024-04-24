@@ -17,15 +17,26 @@ type AllowanceGorm struct {
 }
 
 func InitializeData(db *gorm.DB) error {
-	allowances := []AllowanceGorm{
-		{AllowanceType: "Personal", Amount: 60000.0},
-		{AllowanceType: "Kreceipt", Amount: 0.0},
+	configs := []struct {
+		AllowanceType string
+		Amount        float64
+	}{
+		{"PersonalDefault", 60000},
+		{"PersonalMax", 100000},
+		{"DonationMax", 100000},
+		{"KReceiptDefault", 50000},
+		{"KReceiptMax", 100000},
 	}
-	for _, allowance := range allowances {
-		if allowance.AllowanceType != "Personal" && allowance.AllowanceType != "Kreceipt" {
-			return fmt.Errorf("invalid allowance type: %s", allowance.AllowanceType)
+
+	for _, cfg := range configs {
+		allowance := AllowanceGorm{
+			AllowanceType: cfg.AllowanceType,
+			Amount:        cfg.Amount,
 		}
-		db.FirstOrCreate(&allowance, Allowance{AllowanceType: allowance.AllowanceType})
+		if err := db.FirstOrCreate(&allowance, AllowanceGorm{AllowanceType: cfg.AllowanceType}).Error; err != nil {
+			return fmt.Errorf("failed to initialize data for %s: %v", cfg.AllowanceType, err)
+		}
 	}
+
 	return nil
 }
