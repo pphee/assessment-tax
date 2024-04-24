@@ -24,21 +24,34 @@ func (service *TaxService) CalculateTax(req model.TaxRequest) (float64, []model.
 		return 0, nil, fmt.Errorf("failed to retrieve allowance configuration: %w", err)
 	}
 
+	personalDefault := allowances[0].Amount
+	personalMax := allowances[1].Amount
+	donationMax := allowances[2].Amount
+	kReceiptDefault := allowances[3].Amount
+	kReceiptMax := allowances[4].Amount
+
 	var totalDeductions float64
 	for _, allowance := range req.Allowances {
 		if allowance.Amount < 0 {
 			return 0, nil, errors.New("allowance amount cannot be negative")
 		}
-		PersonalMax := allowances[1].Amount
-		DonationMax := allowances[2].Amount
+
 		switch allowance.AllowanceType {
 		case "personal":
-			if allowance.Amount > PersonalMax || allowance.Amount < 10000 {
-				return 0, nil, fmt.Errorf("personal allowance amount must be between 10000 and %f", PersonalMax)
+			if allowance.Amount > personalMax || allowance.Amount < 10000 {
+				return 0, nil, fmt.Errorf("personal allowance amount must be between 10000 and %f", personalMax)
 			}
 		case "donation":
-			if allowance.Amount > DonationMax {
-				allowance.Amount = DonationMax
+			if allowance.Amount > donationMax {
+				allowance.Amount = donationMax
+			}
+		case "k-receipt":
+			if allowance.Amount > 0 {
+				allowance.Amount = kReceiptDefault
+			}
+		case "k-receipt-admin":
+			if allowance.Amount > kReceiptMax {
+				allowance.Amount = kReceiptMax
 			}
 		}
 		totalDeductions += allowance.Amount
@@ -47,9 +60,8 @@ func (service *TaxService) CalculateTax(req model.TaxRequest) (float64, []model.
 	if req.WHT < 0 || req.WHT > req.TotalIncome {
 		return 0, nil, errors.New("invalid WHT value")
 	}
-	PersonalDefault := allowances[0].Amount
 
-	taxableIncome := req.TotalIncome - totalDeductions - PersonalDefault
+	taxableIncome := req.TotalIncome - totalDeductions - personalDefault
 	tax, taxBrackets := utils.CalculateIncomeTaxDetailed(taxableIncome)
 	tax -= req.WHT
 	for i := range taxBrackets {
