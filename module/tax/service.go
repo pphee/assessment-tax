@@ -3,8 +3,11 @@ package tax
 import (
 	"errors"
 	"fmt"
+	"github.com/gocarina/gocsv"
 	"github.com/pphee/assessment-tax/internal/model"
 	"github.com/pphee/assessment-tax/utils"
+	"io"
+	"log"
 )
 
 type TaxService struct {
@@ -70,4 +73,13 @@ func (service *TaxService) SetPersonalDeduction(amount float64) error {
 	}
 
 	return nil
+}
+
+func (service *TaxService) TaxFromFile(file io.Reader) ([]model.TotalIncomeCsv, error) {
+	var totalIncomeCsv []model.TotalIncomeCsv
+	if err := gocsv.Unmarshal(file, &totalIncomeCsv); err != nil {
+		log.Fatal("Failed to unmarshal CSV: ", err)
+		return nil, err
+	}
+	return totalIncomeCsv, nil
 }

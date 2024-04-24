@@ -3,6 +3,7 @@ module github.com/pphee/assessment-tax
 go 1.22.2
 
 require (
+	github.com/gocarina/gocsv v0.0.0-20231116093920-b87c2d0e983a
 	github.com/labstack/echo/v4 v4.12.0
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.9

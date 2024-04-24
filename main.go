@@ -37,7 +37,9 @@ func main() {
 	taxService := tax.NewTaxService(taxRepo)
 	taxHandler := tax.NewTaxHandler(taxService)
 
-	e.POST("/tax", taxHandler.PostTaxCalculation)
+	taxGroup := e.Group("/tax")
+	taxGroup.POST("/calculations", taxHandler.PostTaxCalculation)
+	taxGroup.POST("/calculations/upload-csv", taxHandler.TaxCalculationsCSVHandler)
 
 	admin := e.Group("/admin")
 	admin.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
