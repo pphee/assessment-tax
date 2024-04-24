@@ -32,3 +32,14 @@ func (repo *TaxRepository) SetPersonalDeduction(amount float64) error {
 	}
 	return nil
 }
+
+func (repo *TaxRepository) SetKreceiptDeduction(amount float64) error {
+	allowance := model.AllowanceGorm{
+		AllowanceType: "kReceipt",
+		Amount:        amount,
+	}
+	if err := repo.DB.Save(&allowance).Error; err != nil {
+		return err
+	}
+	return nil
+}

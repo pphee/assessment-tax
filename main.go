@@ -47,6 +47,7 @@ func main() {
 	}))
 	{
 		admin.POST("/deductions/personal", taxHandler.SetPersonalDeduction)
+		admin.POST("/deductions/k-receipt", taxHandler.SetKreceiptDeduction)
 	}
 
 	e.GET("/", func(c echo.Context) error {

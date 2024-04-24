@@ -58,6 +58,31 @@ type AdminRequest struct {
 	Amount float64 `json:"amount"`
 }
 
+type AdminPersonalDeductionResponse struct {
+	Amount float64 `json:"-"`
+}
+
+func (ar AdminPersonalDeductionResponse) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		Amount json.Number `json:"personalDeduction"`
+	}{
+		Amount: json.Number(fmt.Sprintf("%.1f", ar.Amount)),
+	})
+}
+
+type AdminKReceiptDeductionResponse struct {
+	Amount float64 `json:"-"`
+}
+
+func (ar AdminKReceiptDeductionResponse) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		Amount json.Number `json:"kReceipt"`
+	}{
+		Amount: json.Number(fmt.Sprintf("%.1f", ar.Amount)),
+	})
+
+}
+
 type TotalIncomeCsv struct {
 	TotalIncome float64 `csv:"totalIncome"`
 	WHT         float64 `csv:"wht"`
