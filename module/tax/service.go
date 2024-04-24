@@ -95,3 +95,16 @@ func (service *TaxService) TaxFromFile(file io.Reader) ([]model.TotalIncomeCsv, 
 	}
 	return totalIncomeCsv, nil
 }
+
+func (service *TaxService) SetKReceiptDeduction(amount float64) error {
+	if amount < 0 || amount > 100000 {
+		return errors.New("amount must be between 0 and 100,000")
+	}
+
+	err := service.Repo.SetKreceiptDeduction(amount)
+	if err != nil {
+		return fmt.Errorf("failed to set K-receipt deduction: %w", err)
+	}
+
+	return nil
+}

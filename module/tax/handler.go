@@ -49,7 +49,33 @@ func (h *TaxHandler) SetPersonalDeduction(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to set personal deduction: " + err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{"personalDeduction": req.Amount})
+	res := model.AdminPersonalDeductionResponse{
+		Amount: req.Amount,
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+// SetKreceiptDeduction
+func (h *TaxHandler) SetKreceiptDeduction(c echo.Context) error {
+	var req model.AdminRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid JSON format or data types"})
+	}
+
+	if req.Amount < 0 || req.Amount > 100000 {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Amount must be between 0 and 100,000"})
+	}
+
+	if err := h.TaxService.SetKReceiptDeduction(req.Amount); err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to set K-receipt deduction: " + err.Error()})
+	}
+
+	res := model.AdminKReceiptDeductionResponse{
+		Amount: req.Amount,
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *TaxHandler) TaxCalculationsCSVHandler(c echo.Context) error {
