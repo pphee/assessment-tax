@@ -10,11 +10,18 @@ import (
 	"log"
 )
 
-type TaxService struct {
-	Repo *TaxRepository
+type TaxServices interface {
+	CalculateTax(req model.TaxRequest) (float64, []model.TaxBracket, error)
+	SetPersonalDeduction(amount float64) error
+	TaxFromFile(file io.Reader) ([]model.TotalIncomeCsv, error)
+	SetKReceiptDeduction(amount float64) error
 }
 
-func NewTaxService(repo *TaxRepository) *TaxService {
+type TaxService struct {
+	Repo TaxRepositories
+}
+
+func NewTaxService(repo TaxRepositories) TaxServices {
 	return &TaxService{Repo: repo}
 }
 
@@ -90,7 +97,7 @@ func (service *TaxService) SetPersonalDeduction(amount float64) error {
 func (service *TaxService) TaxFromFile(file io.Reader) ([]model.TotalIncomeCsv, error) {
 	var totalIncomeCsv []model.TotalIncomeCsv
 	if err := gocsv.Unmarshal(file, &totalIncomeCsv); err != nil {
-		log.Fatal("Failed to unmarshal CSV: ", err)
+		log.Println("Failed to unmarshal CSV: ", err)
 		return nil, err
 	}
 	return totalIncomeCsv, nil

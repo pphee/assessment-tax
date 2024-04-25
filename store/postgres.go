@@ -27,11 +27,11 @@ func NewPostgresStore(dsn string) *PostgresStore {
 
 	db.Exec("CREATE TYPE allowance_type AS ENUM ('Personal', 'Kreceipt');")
 
-	if err := db.AutoMigrate(&model.AllowanceGorm{}); err != nil {
+	if err := db.AutoMigrate(&modelgorm.AllowanceGorm{}); err != nil {
 		log.Fatal("Failed to migrate database: ", err)
 	}
 
-	if err := model.InitializeData(db); err != nil {
+	if err := modelgorm.InitializeData(db); err != nil {
 		log.Fatal("Failed to initialize data: ", err)
 	}
 

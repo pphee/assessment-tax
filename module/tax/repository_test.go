@@ -1,10 +1,10 @@
 package tax
 
 import (
+	modelgorm "github.com/pphee/assessment-tax/store/model"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/pphee/assessment-tax/store/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/postgres"
@@ -29,7 +29,7 @@ func TestGetAllowanceConfig(t *testing.T) {
 	db, mock := setupMockDB(t)
 	repo := NewTaxRepository(db)
 
-	expected := []model.AllowanceGorm{{AllowanceType: "personalDeduction", Amount: 50000}}
+	expected := []modelgorm.AllowanceGorm{{AllowanceType: "personalDeduction", Amount: 50000}}
 	rows := sqlmock.NewRows([]string{"allowance_type", "amount"}).
 		AddRow("personalDeduction", 50000)
 
