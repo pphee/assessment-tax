@@ -16,6 +16,10 @@ type Allowance struct {
 	Amount        float64 `json:"amount"`
 }
 
+type AllowanceConfig struct {
+	Amount float64 `json:"amount"`
+}
+
 type TaxResponse struct {
 	Tax       float64      `json:"-"`
 	TaxLevels []TaxBracket `json:"taxLevel"`

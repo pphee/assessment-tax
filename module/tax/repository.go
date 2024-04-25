@@ -5,16 +5,22 @@ import (
 	"gorm.io/gorm"
 )
 
+type TaxRepositories interface {
+	GetAllowanceConfig() ([]modelgorm.AllowanceGorm, error)
+	SetPersonalDeduction(amount float64) error
+	SetKreceiptDeduction(amount float64) error
+}
+
 type TaxRepository struct {
 	DB *gorm.DB
 }
 
-func NewTaxRepository(db *gorm.DB) *TaxRepository {
+func NewTaxRepository(db *gorm.DB) TaxRepositories {
 	return &TaxRepository{DB: db}
 }
 
-func (repo *TaxRepository) GetAllowanceConfig() ([]model.AllowanceGorm, error) {
-	var allowances []model.AllowanceGorm
+func (repo *TaxRepository) GetAllowanceConfig() ([]modelgorm.AllowanceGorm, error) {
+	var allowances []modelgorm.AllowanceGorm
 	err := repo.DB.Find(&allowances).Error
 	if err != nil {
 		return nil, err
@@ -23,7 +29,7 @@ func (repo *TaxRepository) GetAllowanceConfig() ([]model.AllowanceGorm, error) {
 }
 
 func (repo *TaxRepository) SetPersonalDeduction(amount float64) error {
-	allowance := model.AllowanceGorm{
+	allowance := modelgorm.AllowanceGorm{
 		AllowanceType: "personalDeduction",
 		Amount:        amount,
 	}
@@ -34,7 +40,7 @@ func (repo *TaxRepository) SetPersonalDeduction(amount float64) error {
 }
 
 func (repo *TaxRepository) SetKreceiptDeduction(amount float64) error {
-	allowance := model.AllowanceGorm{
+	allowance := modelgorm.AllowanceGorm{
 		AllowanceType: "kReceipt",
 		Amount:        amount,
 	}

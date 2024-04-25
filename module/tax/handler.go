@@ -9,10 +9,10 @@ import (
 )
 
 type TaxHandler struct {
-	TaxService *TaxService
+	TaxService TaxServices
 }
 
-func NewTaxHandler(service *TaxService) *TaxHandler {
+func NewTaxHandler(service TaxServices) *TaxHandler {
 	return &TaxHandler{TaxService: service}
 }
 
