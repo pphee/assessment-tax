@@ -102,3 +102,33 @@ type TaxDetail struct {
 type TaxResponseCSV struct {
 	Taxes []TaxDetail `json:"taxes"`
 }
+
+func (tr TaxResponseCSV) MarshalJSON() ([]byte, error) {
+	taxes := make([]struct {
+		TotalIncome json.Number `json:"totalIncome"`
+		Tax         json.Number `json:"tax"`
+		TaxRefund   json.Number `json:"taxRefund,omitempty"`
+	}, len(tr.Taxes))
+
+	for i, tl := range tr.Taxes {
+		taxes[i] = struct {
+			TotalIncome json.Number `json:"totalIncome"`
+			Tax         json.Number `json:"tax"`
+			TaxRefund   json.Number `json:"taxRefund,omitempty"`
+		}{
+			TotalIncome: json.Number(fmt.Sprintf("%.1f", tl.TotalIncome)),
+			Tax:         json.Number(fmt.Sprintf("%.1f", tl.Tax)),
+			TaxRefund:   json.Number(fmt.Sprintf("%.1f", tl.TaxRefund)),
+		}
+	}
+
+	return json.Marshal(&struct {
+		Taxes []struct {
+			TotalIncome json.Number `json:"totalIncome"`
+			Tax         json.Number `json:"tax"`
+			TaxRefund   json.Number `json:"taxRefund,omitempty"`
+		} `json:"taxes"`
+	}{
+		Taxes: taxes,
+	})
+}
