@@ -32,11 +32,11 @@ func calculateTotalTax(income float64) float64 {
 
 func calculateTaxBrackets(income float64) []model.TaxBracket {
 	taxBrackets := []model.TaxBracket{
-		{"0-150,000", 0},
-		{"150,001-500,000", 0},
-		{"500,001-1,000,000", 0},
-		{"1,000,001-2,000,000", 0},
-		{"2,000,001 ขึ้นไป", 0},
+		{Level: "0-150,000", Tax: 0},
+		{Level: "150,001-500,000", Tax: 0},
+		{Level: "500,001-1,000,000", Tax: 0},
+		{Level: "1,000,001-2,000,000", Tax: 0},
+		{Level: "2,000,001 ขึ้นไป", Tax: 0},
 	}
 
 	if income > 2000000 {

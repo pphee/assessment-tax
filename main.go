@@ -79,8 +79,8 @@ func main() {
 
 	log.Println("Shutting down server...")
 	startTime := time.Now()
-	log.Println("Sleeping for 5 seconds...")
-	time.Sleep(5 * time.Second)
+	log.Println("Sleeping for 3 seconds...")
+	time.Sleep(3 * time.Second)
 	log.Printf("Slept for %.2f seconds", time.Since(startTime).Seconds())
 	log.Println("Shutting down now...")
 
