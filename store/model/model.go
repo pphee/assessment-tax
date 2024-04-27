@@ -17,6 +17,11 @@ type AllowanceGorm struct {
 }
 
 func InitializeData(db *gorm.DB) error {
+	tx := db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
 	configs := []struct {
 		AllowanceType string
 		Amount        float64
@@ -33,10 +38,11 @@ func InitializeData(db *gorm.DB) error {
 			AllowanceType: cfg.AllowanceType,
 			Amount:        cfg.Amount,
 		}
-		if err := db.FirstOrCreate(&allowance, AllowanceGorm{AllowanceType: cfg.AllowanceType}).Error; err != nil {
+		if err := tx.FirstOrCreate(&allowance, AllowanceGorm{AllowanceType: cfg.AllowanceType}).Error; err != nil {
+			tx.Rollback()
 			return fmt.Errorf("failed to initialize data for %s: %v", cfg.AllowanceType, err)
 		}
 	}
 
-	return nil
+	return tx.Commit().Error
 }
