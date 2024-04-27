@@ -4,6 +4,7 @@ WORKDIR /app
 COPY . .
 RUN go mod tidy
 RUN gofmt -w .
+RUN go vet ./...
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # Final stage
