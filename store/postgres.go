@@ -25,7 +25,17 @@ func NewPostgresStore(dsn string) *PostgresStore {
 		log.Fatal("Error pinging database: ", err)
 	}
 
-	db.Exec("CREATE TYPE allowance_type AS ENUM ('Personal', 'Kreceipt');")
+	if err := db.Exec("CREATE SCHEMA IF NOT EXISTS assessment_tax;").Error; err != nil {
+		log.Fatal("Failed to create schema: ", err)
+	}
+
+	if err := db.Exec("SET search_path TO assessment_tax;").Error; err != nil {
+		log.Fatal("Failed to set schema: ", err)
+	}
+
+	if err := db.Exec("CREATE TYPE assessment_tax.allowance_type AS ENUM ('PersonalDefault', 'PersonalMax', 'DonationMax', 'KReceiptDefault', 'KReceiptMax');").Error; err != nil {
+		log.Fatal("Failed to create ENUM type: ", err)
+	}
 
 	if err := db.AutoMigrate(&modelgorm.AllowanceGorm{}); err != nil {
 		log.Fatal("Failed to migrate database: ", err)
