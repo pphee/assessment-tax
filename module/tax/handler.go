@@ -56,7 +56,6 @@ func (h *TaxHandler) SetPersonalDeduction(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-// SetKreceiptDeduction
 func (h *TaxHandler) SetKreceiptDeduction(c echo.Context) error {
 	var req model.AdminRequest
 	if err := c.Bind(&req); err != nil {

@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -29,7 +31,12 @@ func main() {
 	if err != nil {
 		e.Logger.Fatal("Failed to get raw database object: ", err)
 	}
-	defer sqlDB.Close()
+	defer func(sqlDB *sql.DB) {
+		err := sqlDB.Close()
+		if err != nil {
+			e.Logger.Fatal("Failed to close database connection: ", err)
+		}
+	}(sqlDB)
 
 	// Basic Auth for admin routes
 	adminUser := os.Getenv("ADMIN_USERNAME")
@@ -68,7 +75,7 @@ func main() {
 	log.Printf("Starting server on %s", addr)
 
 	go func() {
-		if err := e.Start(addr); err != nil && err != http.ErrServerClosed {
+		if err := e.Start(addr); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			e.Logger.Fatal("shutting down the server")
 		}
 	}()
