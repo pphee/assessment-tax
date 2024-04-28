@@ -33,8 +33,12 @@ func NewPostgresStore(dsn string) *PostgresStore {
 		log.Fatal("Failed to set schema: ", err)
 	}
 
-	if err := db.Exec("CREATE TYPE assessment_tax.allowance_type AS ENUM ('PersonalDefault', 'PersonalMax', 'DonationMax', 'KReceiptDefault', 'KReceiptMax');").Error; err != nil {
-		log.Fatal("Failed to create ENUM type: ", err)
+	var typeName string
+	db.Raw("SELECT typname FROM pg_type WHERE typname = 'allowance_type'").Scan(&typeName)
+	if typeName == "" {
+		if err := db.Exec("CREATE TYPE assessment_tax.allowance_type AS ENUM ('PersonalDefault', 'PersonalMax', 'DonationMax', 'KReceiptDefault', 'KReceiptMax');").Error; err != nil {
+			log.Fatal("Failed to create ENUM type: ", err)
+		}
 	}
 
 	if err := db.AutoMigrate(&modelgorm.AllowanceGorm{}); err != nil {
